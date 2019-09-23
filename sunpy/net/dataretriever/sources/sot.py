@@ -2,9 +2,10 @@ from sunpy.net.dataretriever.client import GenericClient
 from bs4 import BeautifulSoup
 import urllib.request
 import re
+from sunpy.time import TimeRange, parse_time
 
 
-class SOTClient(GenericClient):
+class SPClient(GenericClient):
     def _get_url_for_timerange(self, timerange, **kwargs):
         base_url = 'http://www.lmsal.com/solarsoft/hinode/level2hao/'
         start = int(timerange.start.strftime('%Y%m%d%H%M%S'))
@@ -34,7 +35,7 @@ class SOTClient(GenericClient):
     def _makeimap(self):
         self.map_['source'] = 'hao'
         self.map_['instrument'] = 'sot'
-        self.map_['physobs'] = 'potato'
+        self.map_['physobs'] = 'stokes_parameters'
         self.map_['provider'] = 'csac'
 
     def _can_handle_query(cls, *query):
@@ -50,12 +51,17 @@ class SOTClient(GenericClient):
         boolean
             answer as to whether client can service the query
         """
-        chkattr = ['Time', 'Instrument', 'Level']
-        chklist = [x.__class__.__name__ in chkattr for x in query]
+
         for x in query:
-            if (
-                x.__class__.__name__ == 'Instrument' and
-                x.value.lower() == 'sot'
-               ):
-                return all(chklist)
-        return False
+            if x.__class__.__name__ == 'Time':
+                start = (
+                         x.start.start().strftime('%Y%m%d%H%M%S') if isinstance(x.start, TimeRange)
+                         else parse_time(x.start).strftime('%Y%m%d%H%M%S')
+                        )
+                if int(start) < 20061026161012:
+                    return False
+            if x.__class__.__name__ == 'Instrument' and x.value.lower() != 'sp':
+                return False
+            if x.__class__.__name__ == 'Level' and x.value != '2' and x.value != float(2):
+                return False
+        return True
