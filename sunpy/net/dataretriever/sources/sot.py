@@ -17,7 +17,7 @@ class SPClient(GenericClient):
 
     >>> from sunpy.net import Fido, attrs as a
     >>> results = Fido.search(a.Time('2019/06/09 00:00', '2019/06/11 23:59'),
-    ...                       a.Instrument('sp'),
+    ...                       a.Instrument('sotsp'),
     ...                       a.Level('2'))
     >>> results  #doctest: +REMOTE_DATA +ELLIPSIS
     <sunpy.net.fido_factory.UnifiedResponse object at ...>
@@ -111,7 +111,7 @@ class SPClient(GenericClient):
         """
         self.map_['source'] = 'hao'
         self.map_['instrument'] = 'sot'
-        self.map_['physobs'] = 'stokes_parameters'
+        self.map_['physobs'] = 'stokes_inversions'
         self.map_['provider'] = 'csac'
 
     @classmethod
@@ -132,7 +132,7 @@ class SPClient(GenericClient):
         for x in query:
             if (
                 x.__class__.__name__ == 'Instrument' and
-                x.value.lower() != 'sp'
+                x.value.lower() != 'sotsp'
                ):
                 return False
             elif (
