@@ -66,13 +66,13 @@ class SPClient(GenericClient):
         result = list()
 
         for date in range(range_start, range_end + 1):
-            result.append(self._get_url_for_date(str(date), start, end))
+            result += self._get_url_for_date(str(date), start, end)
 
         return result
 
     def _get_url_for_date(self, date, start, end):
         """
-        Return URL for corresponding date.
+        Return URLs for corresponding date.
 
         Parameters
         ----------
@@ -84,8 +84,8 @@ class SPClient(GenericClient):
 
         Returns
         -------
-        str
-            The URL for the corresponding date.
+        list
+            List of URLs for the corresponding date.
         """
 
         base_url = 'http://www.lmsal.com/solarsoft/hinode/level2hao/'
@@ -93,6 +93,7 @@ class SPClient(GenericClient):
                '/SP3D/')
         resp = urllib.request.urlopen(url)
         soup = BeautifulSoup(resp)
+        results = list()
 
         for link in soup.find_all('a'):
             link = link.get('href')
@@ -101,7 +102,8 @@ class SPClient(GenericClient):
                 int(link[-16:-8] + link[-7:-1]) <= end and
                 int(link[-16:-8] + link[-7:-1]) >= start
                ):
-                return url + link + link[:-1] + '.fits'
+                results.append(url + link + link[:-1] + '.fits')
+        return results
 
     def _makeimap(self):
         """
